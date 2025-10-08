@@ -16,7 +16,7 @@ A simple Expo React Native app with Google AdMob banner and interstitial ads.
 Download this project to your computer:
 
 ```bash
-git clone <your-repo-url>
+git clone <repo-url>
 cd my-app
 ```
 
