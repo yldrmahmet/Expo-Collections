@@ -12,9 +12,11 @@ Türkiye için sahur ve iftar vakitleri uygulaması.
 ## Kurulum
 
 ```bash
-pnpm install
-pnpm start
+npm install
+npx expo start
 ```
+
+Expo Go uygulaması gerekli (App Store / Google Play).
 
 ## Tech Stack
 
