@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { View, FlatList, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,24 @@ export default function CalendarScreen() {
   } = useCity();
   const { monthlyPrayers, loading, error, refetch } = usePrayerTimes(city);
   const [viewMode, setViewMode] = useState<ViewMode>('simple');
+  const flatListRef = useRef<FlatList<DayPrayers>>(null);
+
+  // Bugüne scroll yap
+  const todayIndex = monthlyPrayers.findIndex((day) => day.isToday);
+
+  useEffect(() => {
+    if (todayIndex > 0 && flatListRef.current) {
+      // Liste renderdan sonra scroll yap
+      // Dün'e scroll yap ki bugün ortada görünsün (1 gün üstte, 1 gün altta)
+      const scrollIndex = Math.max(0, todayIndex - 1);
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: scrollIndex,
+          animated: false,
+        });
+      }, 100);
+    }
+  }, [todayIndex, city]);
 
   // GPS konum tespiti yapılıyor
   if (isDetecting) {
@@ -124,14 +142,15 @@ export default function CalendarScreen() {
     <PrayerTimeCard day={item} showAllPrayers={viewMode === 'detailed'} />
   );
 
-  const getItemLayout = (_: unknown, index: number) => ({
-    length: 88,
-    offset: 88 * index,
-    index,
-  });
-
-  // Bugünün index'ini bul
-  const todayIndex = monthlyPrayers.findIndex((day) => day.isToday);
+  // Scroll hatası durumunda fallback
+  const onScrollToIndexFailed = (info: { index: number }) => {
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({
+        index: info.index,
+        animated: false,
+      });
+    }, 500);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -205,14 +224,14 @@ export default function CalendarScreen() {
 
       {/* Prayer Times List */}
       <FlatList
+        ref={flatListRef}
         data={monthlyPrayers}
         renderItem={renderDay}
         keyExtractor={(item) => item.date}
         className="flex-1"
         contentContainerStyle={{ paddingVertical: 8 }}
         showsVerticalScrollIndicator={true}
-        initialScrollIndex={todayIndex > 0 ? todayIndex : 0}
-        getItemLayout={getItemLayout}
+        onScrollToIndexFailed={onScrollToIndexFailed}
         accessible={true}
         accessibilityLabel="Aylık namaz vakitleri listesi"
         accessibilityRole="list"
