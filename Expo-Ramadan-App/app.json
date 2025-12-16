@@ -2,7 +2,7 @@
   "expo": {
     "name": "İftar Vakti - İmsakiye 2026",
     "slug": "iftar-vakti-imsakiye-2026",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "scheme": "iftar-vakti",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
