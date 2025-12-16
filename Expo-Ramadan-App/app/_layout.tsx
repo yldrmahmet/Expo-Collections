@@ -1,10 +1,12 @@
 import '../global.css';
 
 import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
+import { VersionInfo } from '../components';
 
 // Splash screen'i otomatik kapatmayı engelle
 SplashScreen.preventAutoHideAsync();
@@ -32,13 +34,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#FFFFFF' },
-          animation: 'slide_from_right',
-        }}
-      />
+      <View className="flex-1">
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: '#FFFFFF' },
+            animation: 'slide_from_right',
+          }}
+        />
+        <VersionInfo />
+      </View>
     </SafeAreaProvider>
   );
 }

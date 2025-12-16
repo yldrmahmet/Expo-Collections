@@ -5,7 +5,9 @@
     "version": "1.0.1",
     "scheme": "ramazan-rehberi",
     "orientation": "portrait",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "icon": "./assets/acilis-ekrani.png",
     "splash": {
       "image": "./assets/acilis-ekrani.png",
