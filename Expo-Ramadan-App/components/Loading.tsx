@@ -13,8 +13,8 @@ export function Loading({ message = 'Yükleniyor...' }: LoadingProps) {
       accessibilityLabel={message}
       accessibilityLiveRegion="polite"
     >
-      <ActivityIndicator size="large" color="#2E7D32" />
-      <Text className="mt-4 text-lg text-text-secondary text-center">{message}</Text>
+      <ActivityIndicator size={80} color="#2E7D32" />
+      <Text className="mt-6 text-2xl text-text-secondary text-center">{message}</Text>
     </View>
   );
 }

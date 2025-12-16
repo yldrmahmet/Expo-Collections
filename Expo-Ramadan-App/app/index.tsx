@@ -3,10 +3,16 @@ import { View, FlatList, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { usePrayerTimes, useCity, DayPrayers } from '../hooks';
+import { usePrayerTimes, useCity, DayPrayers, MonthYear } from '../hooks';
 import { Header, Loading, ErrorMessage, PrayerTimeCard, CityPicker } from '../components';
 
 type ViewMode = 'simple' | 'detailed';
+
+// Türkçe ay isimleri
+const MONTHS_TR = [
+  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+];
 
 export default function CalendarScreen() {
   const {
@@ -18,15 +24,57 @@ export default function CalendarScreen() {
     selectCity,
     detectLocation,
   } = useCity();
-  const { monthlyPrayers, loading, error, refetch } = usePrayerTimes(city);
+
+  // Ay seçimi state'i
+  const today = new Date();
+  const [selectedMonth, setSelectedMonth] = useState<MonthYear>({
+    year: today.getFullYear(),
+    month: today.getMonth(),
+  });
+
+  const { monthlyPrayers, loading, error, refetch } = usePrayerTimes(city, selectedMonth);
   const [viewMode, setViewMode] = useState<ViewMode>('simple');
   const flatListRef = useRef<FlatList<DayPrayers>>(null);
+
+  // Şu anki ay mı kontrol et
+  const isCurrentMonth =
+    selectedMonth.year === today.getFullYear() &&
+    selectedMonth.month === today.getMonth();
+
+  // Önceki aya git
+  const goToPreviousMonth = () => {
+    setSelectedMonth((prev) => {
+      if (prev.month === 0) {
+        return { year: prev.year - 1, month: 11 };
+      }
+      return { ...prev, month: prev.month - 1 };
+    });
+  };
+
+  // Sonraki aya git
+  const goToNextMonth = () => {
+    setSelectedMonth((prev) => {
+      if (prev.month === 11) {
+        return { year: prev.year + 1, month: 0 };
+      }
+      return { ...prev, month: prev.month + 1 };
+    });
+  };
+
+  // Bugüne dön
+  const goToToday = () => {
+    setSelectedMonth({
+      year: today.getFullYear(),
+      month: today.getMonth(),
+    });
+  };
 
   // Bugüne scroll yap
   const todayIndex = monthlyPrayers.findIndex((day) => day.isToday);
 
   useEffect(() => {
-    if (todayIndex > 0 && flatListRef.current) {
+    // Sadece şu anki ayda ve bugün varsa scroll yap
+    if (isCurrentMonth && todayIndex > 0 && flatListRef.current) {
       // Liste renderdan sonra scroll yap
       // Dün'e scroll yap ki bugün ortada görünsün (1 gün üstte, 1 gün altta)
       const scrollIndex = Math.max(0, todayIndex - 1);
@@ -36,8 +84,11 @@ export default function CalendarScreen() {
           animated: false,
         });
       }, 100);
+    } else if (!isCurrentMonth && flatListRef.current) {
+      // Başka aylarda en üste scroll yap
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     }
-  }, [todayIndex, city]);
+  }, [todayIndex, city, isCurrentMonth, selectedMonth]);
 
   // GPS konum tespiti yapılıyor
   if (isDetecting) {
@@ -157,11 +208,51 @@ export default function CalendarScreen() {
       {/* Header */}
       <Header
         title="Namaz Vakitleri"
-        subtitle="Aylık Takvim"
+        subtitle={`${MONTHS_TR[selectedMonth.month]} ${selectedMonth.year}`}
         showLocationButton
         locationName={city}
         onLocationPress={openCityPicker}
       />
+
+      {/* Month Navigation */}
+      <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-divider">
+        <Pressable
+          onPress={goToPreviousMonth}
+          className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Önceki ay"
+        >
+          <Ionicons name="chevron-back" size={24} color="#2E7D32" />
+        </Pressable>
+
+        <View className="flex-row items-center gap-2">
+          <Text className="text-xl font-bold text-text-primary">
+            {MONTHS_TR[selectedMonth.month]} {selectedMonth.year}
+          </Text>
+          {!isCurrentMonth && (
+            <Pressable
+              onPress={goToToday}
+              className="px-3 py-1 bg-primary rounded-full active:opacity-80"
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Bugüne dön"
+            >
+              <Text className="text-sm font-semibold text-white">Bugün</Text>
+            </Pressable>
+          )}
+        </View>
+
+        <Pressable
+          onPress={goToNextMonth}
+          className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Sonraki ay"
+        >
+          <Ionicons name="chevron-forward" size={24} color="#2E7D32" />
+        </Pressable>
+      </View>
 
       {/* View Mode Toggle */}
       <View className="flex-row p-4 gap-2 bg-surface border-b border-divider">

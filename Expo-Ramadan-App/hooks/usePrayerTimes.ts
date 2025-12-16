@@ -124,11 +124,16 @@ function calculateDayPrayers(
   };
 }
 
+export interface MonthYear {
+  year: number;
+  month: number; // 0-11
+}
+
 /**
  * Offline namaz vakitleri hook'u
  * adhan-js ile yerel hesaplama yapar - internet gerektirmez
  */
-export function usePrayerTimes(city: string) {
+export function usePrayerTimes(city: string, selectedMonth?: MonthYear) {
   // Şehir koordinatlarını al
   const cityData = useMemo(() => {
     if (!city) return null;
@@ -143,8 +148,10 @@ export function usePrayerTimes(city: string) {
       const coordinates = new Coordinates(cityData.latitude, cityData.longitude);
       const params = getDiyanetParams();
       const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
+
+      // Seçili ay veya şu anki ay
+      const year = selectedMonth?.year ?? today.getFullYear();
+      const month = selectedMonth?.month ?? today.getMonth();
 
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -159,7 +166,7 @@ export function usePrayerTimes(city: string) {
       console.error('Prayer calculation error:', err);
       return [];
     }
-  }, [cityData]);
+  }, [cityData, selectedMonth?.year, selectedMonth?.month]);
 
   // Şehir boşsa → loading state (UI welcome screen gösterecek)
   // Şehir var ama bulunamadıysa → error state
