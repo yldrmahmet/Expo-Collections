@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Modal, View, Text, FlatList, Pressable, SafeAreaView } from 'react-native';
+import { Modal, View, Text, FlatList, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getCityNames } from '../constants/CityCoordinates';
 
