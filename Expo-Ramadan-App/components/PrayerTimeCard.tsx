@@ -1,5 +1,4 @@
 import { View, Text } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DayPrayers } from '../hooks';
 
 interface PrayerTimeCardProps {
@@ -7,20 +6,26 @@ interface PrayerTimeCardProps {
   showAllPrayers?: boolean;
 }
 
+// Her gün farklı yemek ikonu
+const IFTAR_EMOJIS = ['🍲', '🥘', '🍛', '🥗', '🍜', '🍵', '🥙', '🧆'];
+
 export function PrayerTimeCard({ day, showAllPrayers = false }: PrayerTimeCardProps) {
-  // Sahur (İmsak) ve İftar (Akşam) vakitlerini bul
   const sahurTime = day.prayers.find((p) => p.nameEnglish === 'Fajr')?.time || '';
   const iftarTime = day.prayers.find((p) => p.nameEnglish === 'Maghrib')?.time || '';
+
+  // Günün tarihine göre emoji seç
+  const dayNumber = parseInt(day.date.split(' ')[0]) || 1;
+  const iftarEmoji = IFTAR_EMOJIS[(dayNumber - 1) % IFTAR_EMOJIS.length];
 
   const accessibilityLabel = day.isToday
     ? `Bugün, ${day.date}, ${day.hijriDate}. Sahur ${sahurTime}, İftar ${iftarTime}`
     : `${day.weekday}, ${day.date}, ${day.hijriDate}. Sahur ${sahurTime}, İftar ${iftarTime}`;
 
-  // Basit görünüm - Sadece Sahur ve İftar, büyük ve ikonlu
+  // Basit görünüm - Sadece Sahur ve İftar
   if (!showAllPrayers) {
     return (
       <View
-        className={`flex-row mx-4 my-2 min-h-[120px] rounded-card overflow-hidden bg-surface-elevated shadow-md ${
+        className={`flex-row mx-4 my-2 min-h-[130px] rounded-card overflow-hidden bg-surface-elevated shadow-md ${
           day.isToday ? 'border-[3px] border-primary bg-today-bg shadow-lg' : ''
         }`}
         accessible={true}
@@ -60,20 +65,10 @@ export function PrayerTimeCard({ day, showAllPrayers = false }: PrayerTimeCardPr
         <View className="flex-1 flex-row items-center justify-evenly py-4 px-2">
           {/* Sahur */}
           <View className="items-center justify-center flex-1">
-            <View
-              className={`w-12 h-12 rounded-full justify-center items-center mb-1 ${
-                day.isToday ? 'bg-primary/15' : 'bg-surface'
-              }`}
-            >
-              <MaterialCommunityIcons
-                name="weather-night"
-                size={28}
-                color={day.isToday ? '#1B5E20' : '#2E7D32'}
-              />
-            </View>
+            <Text className="text-[44px] mb-1">🌙</Text>
             <Text
               className={`text-base font-semibold mb-1 ${
-                day.isToday ? 'text-primary-dark' : 'text-text-secondary'
+                day.isToday ? 'text-amber-700' : 'text-text-secondary'
               }`}
             >
               Sahur Bitiş
@@ -92,20 +87,10 @@ export function PrayerTimeCard({ day, showAllPrayers = false }: PrayerTimeCardPr
 
           {/* İftar */}
           <View className="items-center justify-center flex-1">
-            <View
-              className={`w-12 h-12 rounded-full justify-center items-center mb-1 ${
-                day.isToday ? 'bg-primary/15' : 'bg-surface'
-              }`}
-            >
-              <MaterialCommunityIcons
-                name="weather-sunset-down"
-                size={28}
-                color={day.isToday ? '#1B5E20' : '#2E7D32'}
-              />
-            </View>
+            <Text className="text-[44px] mb-1">{iftarEmoji}</Text>
             <Text
               className={`text-base font-semibold mb-1 ${
-                day.isToday ? 'text-primary-dark' : 'text-text-secondary'
+                day.isToday ? 'text-orange-700' : 'text-text-secondary'
               }`}
             >
               İftar

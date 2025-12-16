@@ -5,9 +5,7 @@
     "version": "1.0.1",
     "scheme": "ramazan-rehberi",
     "orientation": "portrait",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "icon": "./assets/acilis-ekrani.png",
     "splash": {
       "image": "./assets/acilis-ekrani.png",
@@ -24,9 +22,6 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/acilis-ekrani.png",
         "backgroundColor": "#2E7D32"
-      },
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy"
       },
       "softwareKeyboardLayoutMode": "pan"
     },
@@ -49,12 +44,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Konum iznine gerek yoktur, izin vermek istemiyorsanız sizi şehir seçme ekranına yönlendireceğiz."
+          "locationAlwaysAndWhenInUsePermission": "Konum izni ile bulunduğunuz şehri otomatik tespit ediyoruz."
         }
       ],
-      "expo-audio",
-      "expo-font",
-      "expo-asset",
       "expo-router"
     ]
   }

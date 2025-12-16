@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   Coordinates,
   PrayerTimes,
@@ -41,11 +41,9 @@ const MONTHS_TR = [
 
 /**
  * Diyanet hesaplama parametreleri
- * Fajr: 18°, Isha: 17°
  */
 function getDiyanetParams(): CalculationParameters {
-  const params = CalculationMethod.Turkey();
-  return params;
+  return CalculationMethod.Turkey();
 }
 
 /**
@@ -68,18 +66,13 @@ function formatDate(date: Date): string {
 
 /**
  * Miladi tarihi Hicri tarihe çevir (yaklaşık hesaplama)
- * Not: Gerçek Hicri takvim için ay gözlemi gerekir
  */
 function toHijriDate(date: Date): string {
-  // Hicri takvim başlangıcı: 16 Temmuz 622
   const hijriEpoch = new Date(622, 6, 16);
   const diffDays = Math.floor((date.getTime() - hijriEpoch.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Hicri yıl yaklaşık 354.36667 gün
   const hijriYear = Math.floor(diffDays / 354.36667) + 1;
   const daysInYear = diffDays % 354.36667;
-
-  // Hicri ay yaklaşık 29.53 gün
   const hijriMonth = Math.floor(daysInYear / 29.53) + 1;
   const hijriDay = Math.floor(daysInYear % 29.53) + 1;
 
@@ -136,17 +129,15 @@ function calculateDayPrayers(
  * adhan-js ile yerel hesaplama yapar - internet gerektirmez
  */
 export function usePrayerTimes(city: string) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // Şehir koordinatlarını al
-  const cityData = useMemo(() => getCityCoordinates(city), [city]);
+  const cityData = useMemo(() => {
+    if (!city) return null;
+    return getCityCoordinates(city);
+  }, [city]);
 
   // Aylık namaz vakitlerini hesapla
   const monthlyPrayers = useMemo(() => {
-    if (!cityData) {
-      return [];
-    }
+    if (!cityData) return [];
 
     try {
       const coordinates = new Coordinates(cityData.latitude, cityData.longitude);
@@ -155,10 +146,8 @@ export function usePrayerTimes(city: string) {
       const year = today.getFullYear();
       const month = today.getMonth();
 
-      // Ayın gün sayısını bul
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      // Her gün için hesapla
       const prayers: DayPrayers[] = [];
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
@@ -172,29 +161,14 @@ export function usePrayerTimes(city: string) {
     }
   }, [cityData]);
 
-  // Loading ve error state'lerini güncelle
-  useEffect(() => {
-    if (!city) {
-      setError('Şehir seçilmedi');
-      setLoading(false);
-      return;
-    }
+  // Şehir boşsa → loading state (UI welcome screen gösterecek)
+  // Şehir var ama bulunamadıysa → error state
+  // Şehir bulunduysa → success state
+  const loading = !city;
+  const error = city && !cityData ? `"${city}" şehri bulunamadı` : null;
 
-    if (!cityData) {
-      setError(`"${city}" şehri bulunamadı`);
-      setLoading(false);
-      return;
-    }
-
-    setError(null);
-    setLoading(false);
-  }, [city, cityData]);
-
-  // Yeniden hesaplama fonksiyonu (aslında gerekmiyor ama API uyumluluğu için)
   const refetch = () => {
-    setLoading(true);
-    // useMemo zaten yeniden hesaplayacak
-    setTimeout(() => setLoading(false), 100);
+    // Offline hesaplama - yeniden hesaplama gerekmiyor
   };
 
   return {
