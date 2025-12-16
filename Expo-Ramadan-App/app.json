@@ -2,7 +2,7 @@
   "expo": {
     "name": "İftar Vakti - İmsakiye 2026",
     "slug": "iftar-vakti-imsakiye-2026",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "scheme": "iftar-vakti",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -36,7 +36,9 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
       ],
       "softwareKeyboardLayoutMode": "pan"
     },
@@ -49,6 +51,14 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Konum izni ile bulunduğunuz şehri otomatik tespit ediyoruz."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": [],
+          "icon": "./assets/acilis-ekrani.png",
+          "color": "#2E7D32"
         }
       ],
       "expo-router"

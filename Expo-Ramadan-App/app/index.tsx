@@ -3,8 +3,15 @@ import { View, FlatList, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { usePrayerTimes, useCity, DayPrayers, MonthYear } from '../hooks';
-import { Header, Loading, ErrorMessage, PrayerTimeCard, CityPicker } from '../components';
+import { usePrayerTimes, useCity, useNotifications, DayPrayers, MonthYear } from '../hooks';
+import {
+  Header,
+  Loading,
+  ErrorMessage,
+  PrayerTimeCard,
+  CityPicker,
+  NotificationSettings,
+} from '../components';
 
 type ViewMode = 'simple' | 'detailed';
 
@@ -35,6 +42,14 @@ export default function CalendarScreen() {
   const { monthlyPrayers, loading, error, refetch } = usePrayerTimes(city, selectedMonth);
   const [viewMode, setViewMode] = useState<ViewMode>('simple');
   const flatListRef = useRef<FlatList<DayPrayers>>(null);
+
+  // Bildirim ayarları
+  const {
+    settings: notificationSettings,
+    toggleNotifications,
+    togglePrayer,
+  } = useNotifications(city);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
 
   // Şu anki ay mı kontrol et
   const isCurrentMonth =
@@ -216,15 +231,26 @@ export default function CalendarScreen() {
 
       {/* Month Navigation */}
       <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-divider">
-        <Pressable
-          onPress={goToPreviousMonth}
-          className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Önceki ay"
-        >
-          <Ionicons name="chevron-back" size={24} color="#2E7D32" />
-        </Pressable>
+        <View className="flex-row items-center gap-2">
+          <Pressable
+            onPress={goToPreviousMonth}
+            className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Önceki ay"
+          >
+            <Ionicons name="chevron-back" size={24} color="#2E7D32" />
+          </Pressable>
+          <Pressable
+            onPress={goToNextMonth}
+            className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Sonraki ay"
+          >
+            <Ionicons name="chevron-forward" size={24} color="#2E7D32" />
+          </Pressable>
+        </View>
 
         <View className="flex-row items-center gap-2">
           <Text className="text-xl font-bold text-text-primary">
@@ -243,14 +269,26 @@ export default function CalendarScreen() {
           )}
         </View>
 
+        {/* Bildirim Butonu */}
         <Pressable
-          onPress={goToNextMonth}
-          className="flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-white border border-divider active:bg-gray-100"
+          onPress={() => setShowNotificationSettings(true)}
+          className={`flex-row items-center justify-center min-h-touch-min min-w-touch-min rounded-full border active:bg-gray-100 ${
+            notificationSettings.enabled
+              ? 'bg-primary border-primary'
+              : 'bg-white border-divider'
+          }`}
           accessible={true}
           accessibilityRole="button"
-          accessibilityLabel="Sonraki ay"
+          accessibilityLabel="Bildirim ayarları"
+          accessibilityHint={
+            notificationSettings.enabled ? 'Bildirimler açık' : 'Bildirimler kapalı'
+          }
         >
-          <Ionicons name="chevron-forward" size={24} color="#2E7D32" />
+          <Ionicons
+            name={notificationSettings.enabled ? 'notifications' : 'notifications-outline'}
+            size={24}
+            color={notificationSettings.enabled ? '#FFFFFF' : '#2E7D32'}
+          />
         </Pressable>
       </View>
 
@@ -334,6 +372,15 @@ export default function CalendarScreen() {
         selectedCity={city}
         onSelect={selectCity}
         onClose={closeCityPicker}
+      />
+
+      {/* Notification Settings Modal */}
+      <NotificationSettings
+        visible={showNotificationSettings}
+        settings={notificationSettings}
+        onClose={() => setShowNotificationSettings(false)}
+        onToggleNotifications={toggleNotifications}
+        onTogglePrayer={togglePrayer}
       />
     </SafeAreaView>
   );
