@@ -250,11 +250,35 @@ export function useNotifications(city: string) {
     [settings, city, permissionGranted]
   );
 
+  // Test bildirimi gönder
+  const sendTestNotification = useCallback(async () => {
+    const granted = await requestPermissions();
+    if (!granted) {
+      console.log('Bildirim izni verilmedi');
+      return false;
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '🕌 Test Bildirimi',
+        body: 'Bildirimler düzgün çalışıyor! İftar Vakti uygulaması hazır.',
+        sound: 'default',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 2,
+      },
+    });
+
+    return true;
+  }, []);
+
   return {
     settings,
     permissionGranted,
     isLoading,
     toggleNotifications,
     togglePrayer,
+    sendTestNotification,
   };
 }

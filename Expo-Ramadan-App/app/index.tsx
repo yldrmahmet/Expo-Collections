@@ -48,6 +48,7 @@ export default function CalendarScreen() {
     settings: notificationSettings,
     toggleNotifications,
     togglePrayer,
+    sendTestNotification,
   } = useNotifications(city);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
 
@@ -381,6 +382,7 @@ export default function CalendarScreen() {
         onClose={() => setShowNotificationSettings(false)}
         onToggleNotifications={toggleNotifications}
         onTogglePrayer={togglePrayer}
+        onTestNotification={sendTestNotification}
       />
     </SafeAreaView>
   );

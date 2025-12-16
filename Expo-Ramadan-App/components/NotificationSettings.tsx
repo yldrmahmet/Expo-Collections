@@ -8,6 +8,7 @@ interface NotificationSettingsProps {
   onClose: () => void;
   onToggleNotifications: () => void;
   onTogglePrayer: (prayer: keyof NotificationSettingsType) => void;
+  onTestNotification?: () => void;
 }
 
 // Namaz vakitleri listesi
@@ -26,6 +27,7 @@ export function NotificationSettings({
   onClose,
   onToggleNotifications,
   onTogglePrayer,
+  onTestNotification,
 }: NotificationSettingsProps) {
   return (
     <Modal
@@ -109,6 +111,20 @@ export function NotificationSettings({
                 </Pressable>
               ))}
             </View>
+          )}
+
+          {/* Test Butonu */}
+          {onTestNotification && (
+            <Pressable
+              onPress={onTestNotification}
+              className="mt-6 flex-row items-center justify-center gap-2 p-4 bg-primary rounded-card active:opacity-80"
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Test bildirimi gönder"
+            >
+              <Ionicons name="paper-plane" size={24} color="#FFFFFF" />
+              <Text className="text-xl font-bold text-white">Test Bildirimi Gönder</Text>
+            </Pressable>
           )}
 
           {/* Bilgi Notu */}
