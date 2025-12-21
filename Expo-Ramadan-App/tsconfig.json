@@ -5,9 +5,15 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["components/*"],
-      "@/constants/*": ["constants/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/constants/*": [
+        "constants/*"
+      ]
     }
   },
   "include": [
@@ -17,7 +23,11 @@
     "components/**/*.ts",
     "components/**/*.tsx",
     "hooks/**/*.ts",
-    "constants/**/*.ts"
+    "constants/**/*.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
