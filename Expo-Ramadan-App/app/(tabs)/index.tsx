@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useCityContext } from '../../context';
-import { usePrayerTimes, useMonthNavigation, DayPrayers } from '../../hooks';
+import { usePrayerTimes, useMonthNavigation, useTheme, DayPrayers } from '../../hooks';
 import {
   Loading,
   ErrorMessage,
@@ -28,6 +28,11 @@ export default function HomeScreen() {
     closeCityPicker,
     selectCity,
   } = useCityContext();
+
+  // Tema
+  const { isDark } = useTheme();
+  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
+  const mutedColor = isDark ? '#808080' : '#757575';
 
   // Ay navigasyonu
   const {
@@ -66,7 +71,7 @@ export default function HomeScreen() {
   // Yükleniyor
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <Loading message="Namaz vakitleri hesaplanıyor..." />
         <CityPicker
           visible={showCityPicker}
@@ -81,7 +86,7 @@ export default function HomeScreen() {
   // Hata durumu
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
         <ErrorMessage message={error} onRetry={refetch} />
         <CityPicker
           visible={showCityPicker}
@@ -107,30 +112,30 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       {/* Şehir Seçici Header */}
       <Pressable
         onPress={openCityPicker}
-        className="flex-row items-center justify-center gap-2 py-3 bg-surface border-b border-divider active:bg-divider"
+        className="flex-row items-center justify-center gap-2 py-3 bg-surface border-b border-divider active:opacity-70"
         accessible={true}
         accessibilityRole="button"
         accessibilityLabel={`Şehir: ${city}. Değiştirmek için dokunun`}
       >
-        <Ionicons name="location" size={20} color="#2E7D32" />
+        <Ionicons name="location" size={20} color={primaryColor} />
         <Text className="text-lg font-semibold text-text-primary">{city}</Text>
-        <Ionicons name="chevron-down" size={18} color="#757575" />
+        <Ionicons name="chevron-down" size={18} color={mutedColor} />
       </Pressable>
 
       {/* Ay Navigasyonu */}
-      <View className="flex-row items-center justify-between bg-white border-b border-divider px-4 py-3">
+      <View className="flex-row items-center justify-between bg-background border-b border-divider px-4 py-3">
         <Pressable
           onPress={goToPreviousMonth}
-          className="items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-surface active:bg-gray-200"
+          className="items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-surface active:opacity-70"
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Önceki ay"
         >
-          <Ionicons name="chevron-back" size={28} color="#2E7D32" />
+          <Ionicons name="chevron-back" size={28} color={primaryColor} />
         </Pressable>
 
         {/* Ay/Yıl + Bugüne Dön */}
@@ -152,12 +157,12 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={goToNextMonth}
-          className="items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-surface active:bg-gray-200"
+          className="items-center justify-center min-h-touch-min min-w-touch-min rounded-full bg-surface active:opacity-70"
           accessible={true}
           accessibilityRole="button"
           accessibilityLabel="Sonraki ay"
         >
-          <Ionicons name="chevron-forward" size={28} color="#2E7D32" />
+          <Ionicons name="chevron-forward" size={28} color={primaryColor} />
         </Pressable>
       </View>
 
@@ -168,7 +173,7 @@ export default function HomeScreen() {
           className={`flex-1 flex-row items-center justify-center gap-1 py-2 px-4 rounded-full min-h-touch-min border ${
             viewMode === 'simple'
               ? 'bg-primary border-primary'
-              : 'bg-white border-primary'
+              : 'bg-surface-elevated border-primary'
           }`}
           accessible={true}
           accessibilityRole="button"
@@ -178,7 +183,7 @@ export default function HomeScreen() {
           <Ionicons
             name="list"
             size={20}
-            color={viewMode === 'simple' ? '#FFFFFF' : '#2E7D32'}
+            color={viewMode === 'simple' ? '#FFFFFF' : primaryColor}
           />
           <Text
             className={`text-base font-semibold ${
@@ -194,7 +199,7 @@ export default function HomeScreen() {
           className={`flex-1 flex-row items-center justify-center gap-1 py-2 px-4 rounded-full min-h-touch-min border ${
             viewMode === 'detailed'
               ? 'bg-primary border-primary'
-              : 'bg-white border-primary'
+              : 'bg-surface-elevated border-primary'
           }`}
           accessible={true}
           accessibilityRole="button"
@@ -204,7 +209,7 @@ export default function HomeScreen() {
           <Ionicons
             name="grid"
             size={20}
-            color={viewMode === 'detailed' ? '#FFFFFF' : '#2E7D32'}
+            color={viewMode === 'detailed' ? '#FFFFFF' : primaryColor}
           />
           <Text
             className={`text-base font-semibold ${
