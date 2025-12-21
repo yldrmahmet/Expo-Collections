@@ -61,16 +61,20 @@ export function useTheme() {
 
   /**
    * Tema tercihini değiştir ve kaydet
+   * Not: setColorScheme senkron çalışır, loading gerekmez
    */
   const setThemePreference = useCallback(async (newPreference: ThemePreference) => {
+    if (newPreference === preference) return;
+
+    setPreference(newPreference);
+    applyTheme(newPreference);
+
     try {
-      setPreference(newPreference);
-      applyTheme(newPreference);
       await AsyncStorage.setItem(STORAGE_KEYS.THEME_PREFERENCE, newPreference);
     } catch (error) {
       console.error('Tema tercihi kaydedilemedi:', error);
     }
-  }, [applyTheme]);
+  }, [applyTheme, preference]);
 
   /**
    * Aktif tema (light veya dark)
