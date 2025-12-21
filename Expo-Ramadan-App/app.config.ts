@@ -1,12 +1,14 @@
 import 'dotenv/config';
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
+const { version } = require('./package.json');
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
 
   name: 'İftar Vakti - İmsakiye 2026',
   slug: 'ramazan-rehberi',
-  version: '1.0.9',
+  version,
   scheme: 'iftar-vakti',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
