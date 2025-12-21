@@ -8,27 +8,31 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Ramazan Teması - WCAG AA uyumlu
+        // CSS Variables ile tema desteği
         primary: {
-          DEFAULT: '#2E7D32',
-          dark: '#1B5E20',
-          light: '#4CAF50',
+          DEFAULT: 'var(--color-primary)',
+          dark: 'var(--color-primary-dark)',
+          light: 'var(--color-primary-light)',
         },
+        background: 'var(--color-background)',
         surface: {
-          DEFAULT: '#F5F5F5',
-          elevated: '#FFFFFF',
+          DEFAULT: 'var(--color-surface)',
+          elevated: 'var(--color-surface-elevated)',
         },
         today: {
-          bg: '#E8F5E9',
+          bg: 'var(--color-today-bg)',
         },
         text: {
-          primary: '#1A1A1A',
-          secondary: '#424242',
-          muted: '#757575',
-          'on-primary': '#FFFFFF',
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          muted: 'var(--color-text-muted)',
+          'on-primary': 'var(--color-text-on-primary)',
         },
-        divider: '#E0E0E0',
-        error: '#D32F2F',
+        divider: 'var(--color-divider)',
+        border: 'var(--color-border)',
+        error: 'var(--color-error)',
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
       },
       fontSize: {
         // Erişilebilirlik: minimum 16px
