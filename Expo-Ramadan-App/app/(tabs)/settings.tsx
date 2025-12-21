@@ -5,10 +5,17 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
 import { useCityContext } from '../../context';
-import { useNotifications } from '../../hooks';
+import { useNotifications, useTheme } from '../../hooks';
 import { PermissionExplanation, BannerAd } from '../../components';
 import { PRAYER_OPTIONS } from '../../constants';
-import type { NotificationSettings } from '../../hooks';
+import type { NotificationSettings, ThemePreference } from '../../hooks';
+
+// Tema seçenekleri
+const THEME_OPTIONS: { key: ThemePreference; label: string; icon: string }[] = [
+  { key: 'system', label: 'Sistem', icon: 'phone-portrait' },
+  { key: 'light', label: 'Açık', icon: 'sunny' },
+  { key: 'dark', label: 'Koyu', icon: 'moon' },
+];
 
 /**
  * Ayarlar Sayfası
@@ -32,8 +39,12 @@ export default function SettingsScreen() {
     toggleNotificationTiming,
     sendTestNotification,
   } = useNotifications(city);
+  const { preference, isDark, setThemePreference } = useTheme();
 
   const [showNotificationPermission, setShowNotificationPermission] = useState(false);
+
+  // Tema renklerini al (dinamik)
+  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
 
   // Bildirim toggle - önce açıklama göster
   const handleToggleNotifications = () => {
@@ -47,8 +58,65 @@ export default function SettingsScreen() {
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32, paddingTop: 16 }}>
+        {/* Tema Ayarları Bölümü */}
+        <View className="mb-6">
+          <Text className="text-base font-semibold text-text-secondary px-4 mb-2">
+            GÖRÜNÜM
+          </Text>
+
+          <View className="bg-surface mx-4 rounded-xl overflow-hidden">
+            <View className="flex-row items-center p-4">
+              <View className="flex-row items-center gap-3 flex-1">
+                <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                  <Ionicons name={isDark ? 'moon' : 'sunny'} size={22} color={primaryColor} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-lg font-semibold text-text-primary">
+                    Tema
+                  </Text>
+                  <Text className="text-sm text-text-secondary mt-0.5">
+                    {THEME_OPTIONS.find(t => t.key === preference)?.label || 'Sistem'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Tema Seçenekleri */}
+            <View className="flex-row border-t border-divider">
+              {THEME_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.key}
+                  onPress={() => setThemePreference(option.key)}
+                  className={`flex-1 py-3 items-center ${
+                    preference === option.key ? 'bg-primary/10' : ''
+                  }`}
+                  accessible={true}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`${option.label} tema`}
+                  accessibilityState={{ selected: preference === option.key }}
+                >
+                  <Ionicons
+                    name={option.icon as any}
+                    size={24}
+                    color={preference === option.key ? primaryColor : isDark ? '#808080' : '#757575'}
+                  />
+                  <Text
+                    className={`text-sm mt-1 ${
+                      preference === option.key
+                        ? 'font-semibold text-primary'
+                        : 'text-text-muted'
+                    }`}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </View>
+
         {/* Bildirim Ayarları Bölümü */}
         <View>
           <Text className="text-base font-semibold text-text-secondary px-4 mb-2">
@@ -60,7 +128,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between p-4 border-b border-divider">
               <View className="flex-row items-center gap-3 flex-1">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons name="notifications" size={22} color="#2E7D32" />
+                  <Ionicons name="notifications" size={22} color={primaryColor} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-lg font-semibold text-text-primary">
@@ -92,14 +160,14 @@ export default function SettingsScreen() {
                 {/* Ezan Vakti Toggle */}
                 <Pressable
                   onPress={() => toggleNotificationTiming('notifyAtPrayerTime')}
-                  className="flex-row items-center justify-between px-4 py-3 active:bg-gray-100"
+                  className="flex-row items-center justify-between px-4 py-3 active:opacity-70"
                   accessible={true}
                   accessibilityRole="switch"
                   accessibilityLabel="Ezan vaktinde bildirim"
                   accessibilityState={{ checked: settings.notifyAtPrayerTime }}
                 >
                   <View className="flex-row items-center gap-3">
-                    <Ionicons name="time" size={24} color="#2E7D32" />
+                    <Ionicons name="time" size={24} color={primaryColor} />
                     <View>
                       <Text className="text-base text-text-primary">Ezan Vaktinde</Text>
                       <Text className="text-xs text-text-secondary">Ezan sesi ile bildirim</Text>
@@ -116,7 +184,7 @@ export default function SettingsScreen() {
                 {/* 5 Dakika Önce Toggle */}
                 <Pressable
                   onPress={() => toggleNotificationTiming('notifyBeforePrayer')}
-                  className="flex-row items-center justify-between px-4 py-3 active:bg-gray-100"
+                  className="flex-row items-center justify-between px-4 py-3 active:opacity-70"
                   accessible={true}
                   accessibilityRole="switch"
                   accessibilityLabel="5 dakika önce bildirim"
@@ -153,7 +221,7 @@ export default function SettingsScreen() {
                     <Pressable
                       key={prayer.key}
                       onPress={() => togglePrayer(prayerKey)}
-                      className="flex-row items-center justify-between px-4 py-3 active:bg-gray-100"
+                      className="flex-row items-center justify-between px-4 py-3 active:opacity-70"
                       accessible={true}
                       accessibilityRole="switch"
                       accessibilityLabel={`${prayer.label} bildirimi`}
@@ -205,18 +273,18 @@ export default function SettingsScreen() {
                       {/* Ezan Vakti Test */}
                       <Pressable
                         onPress={() => sendTestNotification(prayer.key, 'atTime')}
-                        className="flex-row items-center gap-1 px-3 py-2 bg-primary/10 rounded-lg active:bg-primary/20"
+                        className="flex-row items-center gap-1 px-3 py-2 bg-primary/10 rounded-lg active:opacity-70"
                         accessible={true}
                         accessibilityLabel={`${prayer.label} ezan vakti testi`}
                       >
-                        <Ionicons name="volume-high" size={16} color="#2E7D32" />
+                        <Ionicons name="volume-high" size={16} color={primaryColor} />
                         <Text className="text-sm font-medium text-primary">Ezan</Text>
                       </Pressable>
 
                       {/* 5 Dakika Önce Test */}
                       <Pressable
                         onPress={() => sendTestNotification(prayer.key, 'before')}
-                        className="flex-row items-center gap-1 px-3 py-2 bg-orange-100 rounded-lg active:bg-orange-200"
+                        className="flex-row items-center gap-1 px-3 py-2 bg-warning/20 rounded-lg active:opacity-70"
                         accessible={true}
                         accessibilityLabel={`${prayer.label} 5 dakika önce testi`}
                       >
@@ -241,7 +309,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons name="information-circle" size={22} color="#2E7D32" />
+                  <Ionicons name="information-circle" size={22} color={primaryColor} />
                 </View>
                 <Text className="text-base text-text-primary">Versiyon</Text>
               </View>
