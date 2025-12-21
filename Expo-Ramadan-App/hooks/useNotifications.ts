@@ -9,6 +9,10 @@ import { getCityCoordinates, PRAYER_NAMES, PRAYER_EMOJIS, STORAGE_KEYS } from '.
 // Bildirim ayarları tipi
 export interface NotificationSettings {
   enabled: boolean;
+  // Bildirim zamanlaması
+  notifyAtPrayerTime: boolean; // Ezan vaktinde bildirim
+  notifyBeforePrayer: boolean; // 5 dk önce bildirim
+  // Hangi vakitlerde bildirim
   fajr: boolean; // İmsak
   sunrise: boolean; // Güneş
   dhuhr: boolean; // Öğle
@@ -20,12 +24,23 @@ export interface NotificationSettings {
 // Varsayılan ayarlar
 const DEFAULT_SETTINGS: NotificationSettings = {
   enabled: false,
-  fajr: true, // İmsak açık
+  notifyAtPrayerTime: true, // Ezan vakti açık (varsayılan)
+  notifyBeforePrayer: false, // 5 dk önce kapalı (varsayılan)
+  fajr: true,
   sunrise: false,
-  dhuhr: true, // Öğle açık
-  asr: true, // İkindi açık
-  maghrib: true, // Akşam/İftar açık
-  isha: true, // Yatsı açık
+  dhuhr: true,
+  asr: true,
+  maghrib: true,
+  isha: true,
+};
+
+// 5 dakika önce bildirim sesleri (namaz bazlı)
+const BEFORE_PRAYER_SOUNDS: Record<string, string> = {
+  fajr: 'sabah5dk.mp3',
+  dhuhr: 'ogle5dk.mp3',
+  asr: 'ikindi5dk.mp3',
+  maghrib: 'aksam5dk.mp3',
+  isha: 'yatsi5dk.mp3',
 };
 
 // Notification handler ayarla
@@ -50,9 +65,22 @@ async function requestPermissions(): Promise<boolean> {
   // Android için kanallar oluştur
   if (Platform.OS === 'android') {
     // Eski kanalları sil (ses değişikliği için gerekli)
-    await Notifications.deleteNotificationChannelAsync('prayer-times').catch(() => {});
-    await Notifications.deleteNotificationChannelAsync('prayer-fajr').catch(() => {});
+    const oldChannels = [
+      'prayer-times',
+      'prayer-fajr',
+      'prayer-fajr-1',
+      'prayer-fajr-2',
+      'prayer-5min-sabah',
+      'prayer-5min-ogle',
+      'prayer-5min-ikindi',
+      'prayer-5min-aksam',
+      'prayer-5min-yatsi',
+    ];
+    for (const channel of oldChannels) {
+      await Notifications.deleteNotificationChannelAsync(channel).catch(() => {});
+    }
 
+    // === EZAN VAKTİ KANALLARI ===
     // Normal namaz vakitleri kanalı (ezan sesi)
     await Notifications.setNotificationChannelAsync('prayer-times', {
       name: 'Namaz Vakitleri',
@@ -79,6 +107,47 @@ async function requestPermissions(): Promise<boolean> {
       lightColor: '#2E7D32',
       sound: 'sabah2.mp3',
     });
+
+    // === 5 DAKİKA ÖNCE KANALLARI ===
+    await Notifications.setNotificationChannelAsync('prayer-5min-sabah', {
+      name: '5 Dakika Önce - Sabah',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'sabah5dk.mp3',
+    });
+
+    await Notifications.setNotificationChannelAsync('prayer-5min-ogle', {
+      name: '5 Dakika Önce - Öğle',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'ogle5dk.mp3',
+    });
+
+    await Notifications.setNotificationChannelAsync('prayer-5min-ikindi', {
+      name: '5 Dakika Önce - İkindi',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'ikindi5dk.mp3',
+    });
+
+    await Notifications.setNotificationChannelAsync('prayer-5min-aksam', {
+      name: '5 Dakika Önce - Akşam',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'aksam5dk.mp3',
+    });
+
+    await Notifications.setNotificationChannelAsync('prayer-5min-yatsi', {
+      name: '5 Dakika Önce - Yatsı',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'yatsi5dk.mp3',
+    });
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -99,6 +168,15 @@ async function cancelAllNotifications(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
+// 5 dakika önce kanal eşlemesi
+const BEFORE_PRAYER_CHANNELS: Record<string, string> = {
+  fajr: 'prayer-5min-sabah',
+  dhuhr: 'prayer-5min-ogle',
+  asr: 'prayer-5min-ikindi',
+  maghrib: 'prayer-5min-aksam',
+  isha: 'prayer-5min-yatsi',
+};
+
 /**
  * Namaz vakitleri için bildirimleri zamanla
  */
@@ -110,6 +188,9 @@ async function schedulePrayerNotifications(
   await cancelAllNotifications();
 
   if (!settings.enabled) return;
+
+  // En az bir bildirim türü açık olmalı
+  if (!settings.notifyAtPrayerTime && !settings.notifyBeforePrayer) return;
 
   const cityData = getCityCoordinates(city);
   if (!cityData) return;
@@ -138,35 +219,66 @@ async function schedulePrayerNotifications(
       const settingKey = prayer.key as keyof NotificationSettings;
       if (!settings[settingKey]) continue;
 
-      // Geçmiş vakitleri atla
-      if (prayer.time <= new Date()) continue;
-
       const prayerName = PRAYER_NAMES[prayer.key];
       const isIftar = prayer.key === 'maghrib';
       const isFajr = prayer.key === 'fajr';
-
-      // Sabah namazı için rastgele ses seç
-      const useFajrSound1 = Math.random() < 0.5;
-      const fajrSound = useFajrSound1 ? 'sabah.mp3' : 'sabah2.mp3';
-      const fajrChannel = useFajrSound1 ? 'prayer-fajr-1' : 'prayer-fajr-2';
-
       const emoji = PRAYER_EMOJIS[prayer.key];
 
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: isIftar ? `${emoji} İftar Vakti!` : `${emoji} ${prayerName} Vakti`,
-          body: isIftar
-            ? `Hayırlı iftarlar! ${city} için iftar vakti girdi.`
-            : `${city} için ${prayerName} namazı vakti girdi.`,
-          sound: isFajr ? fajrSound : 'ezan.mp3',
-          data: { prayer: prayer.key, city },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: prayer.time,
-          channelId: isFajr ? fajrChannel : 'prayer-times',
-        },
-      });
+      // === 5 DAKİKA ÖNCE BİLDİRİM ===
+      if (settings.notifyBeforePrayer && prayer.key !== 'sunrise') {
+        const beforeTime = new Date(prayer.time.getTime() - 5 * 60 * 1000);
+
+        // Geçmiş vakitleri atla
+        if (beforeTime > new Date()) {
+          const beforeSound = BEFORE_PRAYER_SOUNDS[prayer.key];
+          const beforeChannel = BEFORE_PRAYER_CHANNELS[prayer.key];
+
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: isIftar
+                ? `⏰ İftara 5 dakika kaldı!`
+                : `⏰ ${prayerName} vaktine 5 dakika`,
+              body: isIftar
+                ? `${city} için iftar vakti yaklaşıyor. Hazırlıklarınızı tamamlayın.`
+                : `${city} için ${prayerName} namazı vakti yaklaşıyor.`,
+              sound: beforeSound,
+              data: { prayer: prayer.key, city, type: 'before' },
+            },
+            trigger: {
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              date: beforeTime,
+              channelId: beforeChannel,
+            },
+          });
+        }
+      }
+
+      // === EZAN VAKTİ BİLDİRİM ===
+      if (settings.notifyAtPrayerTime) {
+        // Geçmiş vakitleri atla
+        if (prayer.time <= new Date()) continue;
+
+        // Sabah namazı için rastgele ses seç
+        const useFajrSound1 = Math.random() < 0.5;
+        const fajrSound = useFajrSound1 ? 'sabah.mp3' : 'sabah2.mp3';
+        const fajrChannel = useFajrSound1 ? 'prayer-fajr-1' : 'prayer-fajr-2';
+
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: isIftar ? `${emoji} İftar Vakti!` : `${emoji} ${prayerName} Vakti`,
+            body: isIftar
+              ? `Hayırlı iftarlar! ${city} için iftar vakti girdi.`
+              : `${city} için ${prayerName} namazı vakti girdi.`,
+            sound: isFajr ? fajrSound : 'ezan.mp3',
+            data: { prayer: prayer.key, city, type: 'atTime' },
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: prayer.time,
+            channelId: isFajr ? fajrChannel : 'prayer-times',
+          },
+        });
+      }
     }
   }
 }
@@ -268,29 +380,74 @@ export function useNotifications(city: string) {
     [settings, city, permissionGranted]
   );
 
+  // Bildirim zamanlaması ayarını değiştir
+  const toggleNotificationTiming = useCallback(
+    async (timing: 'notifyAtPrayerTime' | 'notifyBeforePrayer') => {
+      const newSettings = { ...settings, [timing]: !settings[timing] };
+      setSettings(newSettings);
+      await saveSettings(newSettings);
+
+      if (newSettings.enabled && city && permissionGranted) {
+        await schedulePrayerNotifications(city, newSettings);
+      }
+    },
+    [settings, city, permissionGranted]
+  );
+
   // Test bildirimi gönder
-  const sendTestNotification = useCallback(async () => {
-    const granted = await requestPermissions();
-    if (!granted) {
-      console.log('Bildirim izni verilmedi');
-      return false;
-    }
+  const sendTestNotification = useCallback(
+    async (prayerKey: string, type: 'atTime' | 'before') => {
+      const granted = await requestPermissions();
+      if (!granted) {
+        console.log('Bildirim izni verilmedi');
+        return false;
+      }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🕌 Test Bildirimi',
-        body: 'Bildirimler düzgün çalışıyor! İftar Vakti uygulaması hazır.',
-        sound: 'ezan.mp3',
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 2,
-        channelId: 'prayer-times',
-      },
-    });
+      const prayerName = PRAYER_NAMES[prayerKey] || prayerKey;
+      const emoji = PRAYER_EMOJIS[prayerKey] || '🕌';
 
-    return true;
-  }, []);
+      if (type === 'atTime') {
+        // Ezan vakti test bildirimi
+        const isFajr = prayerKey === 'fajr';
+        const useFajrSound1 = Math.random() < 0.5;
+        const sound = isFajr ? (useFajrSound1 ? 'sabah.mp3' : 'sabah2.mp3') : 'ezan.mp3';
+        const channelId = isFajr ? (useFajrSound1 ? 'prayer-fajr-1' : 'prayer-fajr-2') : 'prayer-times';
+
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `${emoji} Test - ${prayerName} Vakti`,
+            body: `${prayerName} ezan vakti bildirimi testi.`,
+            sound,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 2,
+            channelId,
+          },
+        });
+      } else {
+        // 5 dakika önce test bildirimi
+        const sound = BEFORE_PRAYER_SOUNDS[prayerKey] || 'aksam5dk.mp3';
+        const channelId = BEFORE_PRAYER_CHANNELS[prayerKey] || 'prayer-5min-aksam';
+
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `⏰ Test - ${prayerName} 5dk Önce`,
+            body: `${prayerName} için 5 dakika önce bildirimi testi.`,
+            sound,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 2,
+            channelId,
+          },
+        });
+      }
+
+      return true;
+    },
+    []
+  );
 
   return {
     settings,
@@ -298,6 +455,7 @@ export function useNotifications(city: string) {
     isLoading,
     toggleNotifications,
     togglePrayer,
+    toggleNotificationTiming,
     sendTestNotification,
   };
 }
