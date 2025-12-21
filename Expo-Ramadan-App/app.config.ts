@@ -62,7 +62,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-notifications',
       {
-        sounds: ['./assets/sabah.mp3', './assets/sabah2.mp3', './assets/ezan.mp3'],
+        sounds: [
+          // 5 dakika öncesi bildirim sesleri (fon müzikli)
+          './assets/sounds/notifications/sabah5dk.mp3',
+          './assets/sounds/notifications/ogle5dk.mp3',
+          './assets/sounds/notifications/ikindi5dk.mp3',
+          './assets/sounds/notifications/aksam5dk.mp3',
+          './assets/sounds/notifications/yatsi5dk.mp3',
+          // Ezan vakti sesleri
+          './assets/sounds/notifications/ezan.mp3',
+          './assets/sounds/notifications/sabah.mp3',
+          './assets/sounds/notifications/sabah2.mp3',
+        ],
         icon: './assets/acilis-ekrani.png',
         color: '#2E7D32',
       },
