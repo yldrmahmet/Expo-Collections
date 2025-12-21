@@ -1,13 +1,11 @@
 import { View, Text } from 'react-native';
 import { DayPrayers } from '../hooks';
+import { IFTAR_EMOJIS } from '../constants';
 
 interface PrayerTimeCardProps {
   day: DayPrayers;
   showAllPrayers?: boolean;
 }
-
-// Her gün farklı yemek ikonu
-const IFTAR_EMOJIS = ['🍲', '🥘', '🍛', '🥗', '🍜', '🍵', '🥙', '🧆'];
 
 export function PrayerTimeCard({ day, showAllPrayers = false }: PrayerTimeCardProps) {
   const sahurTime = day.prayers.find((p) => p.nameEnglish === 'Fajr')?.time || '';
