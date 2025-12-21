@@ -4,10 +4,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Coordinates, PrayerTimes, CalculationMethod } from 'adhan';
-import { getCityCoordinates } from '../constants/CityCoordinates';
-
-// Storage key
-const NOTIFICATION_SETTINGS_KEY = '@notification_settings';
+import { getCityCoordinates, PRAYER_NAMES, PRAYER_EMOJIS, STORAGE_KEYS } from '../constants';
 
 // Bildirim ayarları tipi
 export interface NotificationSettings {
@@ -31,16 +28,6 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   isha: true, // Yatsı açık
 };
 
-// Namaz isimleri
-const PRAYER_NAMES: Record<string, string> = {
-  fajr: 'İmsak',
-  sunrise: 'Güneş',
-  dhuhr: 'Öğle',
-  asr: 'İkindi',
-  maghrib: 'Akşam',
-  isha: 'Yatsı',
-};
-
 // Notification handler ayarla
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -60,14 +47,37 @@ async function requestPermissions(): Promise<boolean> {
     return false;
   }
 
-  // Android için kanal oluştur
+  // Android için kanallar oluştur
   if (Platform.OS === 'android') {
+    // Eski kanalları sil (ses değişikliği için gerekli)
+    await Notifications.deleteNotificationChannelAsync('prayer-times').catch(() => {});
+    await Notifications.deleteNotificationChannelAsync('prayer-fajr').catch(() => {});
+
+    // Normal namaz vakitleri kanalı (ezan sesi)
     await Notifications.setNotificationChannelAsync('prayer-times', {
       name: 'Namaz Vakitleri',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#2E7D32',
-      sound: 'default',
+      sound: 'ezan.mp3',
+    });
+
+    // Sabah namazı için kanal 1
+    await Notifications.setNotificationChannelAsync('prayer-fajr-1', {
+      name: 'Sabah Namazı (Ezan 1)',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'sabah.mp3',
+    });
+
+    // Sabah namazı için kanal 2
+    await Notifications.setNotificationChannelAsync('prayer-fajr-2', {
+      name: 'Sabah Namazı (Ezan 2)',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#2E7D32',
+      sound: 'sabah2.mp3',
     });
   }
 
@@ -116,12 +126,12 @@ async function schedulePrayerNotifications(
 
     // Her namaz vakti için bildirim zamanla
     const prayers = [
-      { key: 'fajr', time: prayerTimes.fajr, emoji: '🌙' },
-      { key: 'sunrise', time: prayerTimes.sunrise, emoji: '🌅' },
-      { key: 'dhuhr', time: prayerTimes.dhuhr, emoji: '☀️' },
-      { key: 'asr', time: prayerTimes.asr, emoji: '🌤️' },
-      { key: 'maghrib', time: prayerTimes.maghrib, emoji: '🍽️' },
-      { key: 'isha', time: prayerTimes.isha, emoji: '🌙' },
+      { key: 'fajr', time: prayerTimes.fajr },
+      { key: 'sunrise', time: prayerTimes.sunrise },
+      { key: 'dhuhr', time: prayerTimes.dhuhr },
+      { key: 'asr', time: prayerTimes.asr },
+      { key: 'maghrib', time: prayerTimes.maghrib },
+      { key: 'isha', time: prayerTimes.isha },
     ];
 
     for (const prayer of prayers) {
@@ -133,20 +143,28 @@ async function schedulePrayerNotifications(
 
       const prayerName = PRAYER_NAMES[prayer.key];
       const isIftar = prayer.key === 'maghrib';
+      const isFajr = prayer.key === 'fajr';
+
+      // Sabah namazı için rastgele ses seç
+      const useFajrSound1 = Math.random() < 0.5;
+      const fajrSound = useFajrSound1 ? 'sabah.mp3' : 'sabah2.mp3';
+      const fajrChannel = useFajrSound1 ? 'prayer-fajr-1' : 'prayer-fajr-2';
+
+      const emoji = PRAYER_EMOJIS[prayer.key];
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: isIftar ? `${prayer.emoji} İftar Vakti!` : `${prayer.emoji} ${prayerName} Vakti`,
+          title: isIftar ? `${emoji} İftar Vakti!` : `${emoji} ${prayerName} Vakti`,
           body: isIftar
             ? `Hayırlı iftarlar! ${city} için iftar vakti girdi.`
             : `${city} için ${prayerName} namazı vakti girdi.`,
-          sound: 'default',
+          sound: isFajr ? fajrSound : 'ezan.mp3',
           data: { prayer: prayer.key, city },
         },
         trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
           date: prayer.time,
-          channelId: 'prayer-times',
+          channelId: isFajr ? fajrChannel : 'prayer-times',
         },
       });
     }
@@ -158,7 +176,7 @@ async function schedulePrayerNotifications(
  */
 async function loadSettings(): Promise<NotificationSettings> {
   try {
-    const stored = await AsyncStorage.getItem(NOTIFICATION_SETTINGS_KEY);
+    const stored = await AsyncStorage.getItem(STORAGE_KEYS.NOTIFICATION_SETTINGS);
     if (stored) {
       return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
     }
@@ -173,7 +191,7 @@ async function loadSettings(): Promise<NotificationSettings> {
  */
 async function saveSettings(settings: NotificationSettings): Promise<void> {
   try {
-    await AsyncStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(settings));
+    await AsyncStorage.setItem(STORAGE_KEYS.NOTIFICATION_SETTINGS, JSON.stringify(settings));
   } catch (error) {
     console.error('Bildirim ayarları kaydedilemedi:', error);
   }
@@ -262,11 +280,12 @@ export function useNotifications(city: string) {
       content: {
         title: '🕌 Test Bildirimi',
         body: 'Bildirimler düzgün çalışıyor! İftar Vakti uygulaması hazır.',
-        sound: 'default',
+        sound: 'ezan.mp3',
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: 2,
+        channelId: 'prayer-times',
       },
     });
 

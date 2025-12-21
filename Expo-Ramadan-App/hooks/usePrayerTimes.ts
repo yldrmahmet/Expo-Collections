@@ -6,7 +6,7 @@ import {
   Prayer,
   CalculationParameters,
 } from 'adhan';
-import { getCityCoordinates } from '../constants/CityCoordinates';
+import { getCityCoordinates, WEEKDAYS_TR, MONTHS_TR, HIJRI_MONTHS } from '../constants';
 
 export interface PrayerTime {
   name: string;
@@ -21,23 +21,6 @@ export interface DayPrayers {
   isToday: boolean;
   prayers: PrayerTime[];
 }
-
-// Türkçe gün isimleri
-const WEEKDAYS_TR = [
-  'Pazar',
-  'Pazartesi',
-  'Salı',
-  'Çarşamba',
-  'Perşembe',
-  'Cuma',
-  'Cumartesi',
-];
-
-// Türkçe ay isimleri
-const MONTHS_TR = [
-  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-];
 
 /**
  * Diyanet hesaplama parametreleri
@@ -75,13 +58,6 @@ function toHijriDate(date: Date): string {
   const daysInYear = diffDays % 354.36667;
   const hijriMonth = Math.floor(daysInYear / 29.53) + 1;
   const hijriDay = Math.floor(daysInYear % 29.53) + 1;
-
-  const HIJRI_MONTHS = [
-    'Muharrem', 'Safer', 'Rebiülevvel', 'Rebiülahir',
-    'Cemaziyelevvel', 'Cemaziyelahir', 'Recep', 'Şaban',
-    'Ramazan', 'Şevval', 'Zilkade', 'Zilhicce',
-  ];
-
   const monthName = HIJRI_MONTHS[(hijriMonth - 1) % 12];
   return `${hijriDay} ${monthName}`;
 }
