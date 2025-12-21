@@ -14,12 +14,22 @@ import type { NotificationSettings } from '../../hooks';
  * Ayarlar Sayfası
  * Bildirim ayarları ve uygulama bilgilerini gösterir
  */
+// Test için namaz listesi (güneş hariç)
+const TEST_PRAYERS = [
+  { key: 'fajr', label: 'Sabah', emoji: '🌙' },
+  { key: 'dhuhr', label: 'Öğle', emoji: '☀️' },
+  { key: 'asr', label: 'İkindi', emoji: '🌤️' },
+  { key: 'maghrib', label: 'Akşam', emoji: '🌅' },
+  { key: 'isha', label: 'Yatsı', emoji: '🌙' },
+];
+
 export default function SettingsScreen() {
   const { city } = useCityContext();
   const {
     settings,
     toggleNotifications,
     togglePrayer,
+    toggleNotificationTiming,
     sendTestNotification,
   } = useNotifications(city);
 
@@ -72,9 +82,69 @@ export default function SettingsScreen() {
               />
             </View>
 
+            {/* Bildirim Zamanlaması - Sadece bildirimler açıksa göster */}
+            {settings.enabled && (
+              <View className="border-b border-divider">
+                <Text className="text-sm font-medium text-text-secondary px-4 pt-4 pb-2">
+                  Ne zaman bildirim alayım?
+                </Text>
+
+                {/* Ezan Vakti Toggle */}
+                <Pressable
+                  onPress={() => toggleNotificationTiming('notifyAtPrayerTime')}
+                  className="flex-row items-center justify-between px-4 py-3 active:bg-gray-100"
+                  accessible={true}
+                  accessibilityRole="switch"
+                  accessibilityLabel="Ezan vaktinde bildirim"
+                  accessibilityState={{ checked: settings.notifyAtPrayerTime }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <Ionicons name="time" size={24} color="#2E7D32" />
+                    <View>
+                      <Text className="text-base text-text-primary">Ezan Vaktinde</Text>
+                      <Text className="text-xs text-text-secondary">Ezan sesi ile bildirim</Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={settings.notifyAtPrayerTime}
+                    onValueChange={() => toggleNotificationTiming('notifyAtPrayerTime')}
+                    trackColor={{ false: '#E0E0E0', true: '#81C784' }}
+                    thumbColor={settings.notifyAtPrayerTime ? '#2E7D32' : '#BDBDBD'}
+                  />
+                </Pressable>
+
+                {/* 5 Dakika Önce Toggle */}
+                <Pressable
+                  onPress={() => toggleNotificationTiming('notifyBeforePrayer')}
+                  className="flex-row items-center justify-between px-4 py-3 active:bg-gray-100"
+                  accessible={true}
+                  accessibilityRole="switch"
+                  accessibilityLabel="5 dakika önce bildirim"
+                  accessibilityState={{ checked: settings.notifyBeforePrayer }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <Ionicons name="alarm" size={24} color="#FF9800" />
+                    <View>
+                      <Text className="text-base text-text-primary">5 Dakika Önce</Text>
+                      <Text className="text-xs text-text-secondary">Hatırlatma sesi ile bildirim</Text>
+                    </View>
+                  </View>
+                  <Switch
+                    value={settings.notifyBeforePrayer}
+                    onValueChange={() => toggleNotificationTiming('notifyBeforePrayer')}
+                    trackColor={{ false: '#E0E0E0', true: '#FFB74D' }}
+                    thumbColor={settings.notifyBeforePrayer ? '#FF9800' : '#BDBDBD'}
+                  />
+                </Pressable>
+              </View>
+            )}
+
             {/* Vakit Seçenekleri - Sadece bildirimler açıksa göster */}
             {settings.enabled && (
               <View className="py-2">
+                <Text className="text-sm font-medium text-text-secondary px-4 pt-2 pb-2">
+                  Hangi vakitlerde?
+                </Text>
                 {PRAYER_OPTIONS.map((prayer) => {
                   const prayerKey = prayer.key as keyof NotificationSettings;
                   const isEnabled = settings[prayerKey] as boolean;
@@ -111,20 +181,53 @@ export default function SettingsScreen() {
             )}
           </View>
 
-          {/* Test Bildirimi Butonu */}
+          {/* Test Bildirimi Butonları */}
           {settings.enabled && (
-            <Pressable
-              onPress={sendTestNotification}
-              className="flex-row items-center justify-center gap-2 mx-4 mt-4 py-4 bg-surface rounded-xl active:bg-gray-100"
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Test bildirimi gönder"
-            >
-              <Ionicons name="paper-plane" size={20} color="#2E7D32" />
-              <Text className="text-base font-semibold text-primary">
-                Test Bildirimi Gönder
+            <View className="mx-4 mt-4">
+              <Text className="text-sm font-medium text-text-secondary mb-2">
+                Test Bildirimleri
               </Text>
-            </Pressable>
+
+              <View className="bg-surface rounded-xl overflow-hidden">
+                {TEST_PRAYERS.map((prayer, index) => (
+                  <View
+                    key={prayer.key}
+                    className={`flex-row items-center justify-between p-3 ${
+                      index < TEST_PRAYERS.length - 1 ? 'border-b border-divider' : ''
+                    }`}
+                  >
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-lg">{prayer.emoji}</Text>
+                      <Text className="text-base text-text-primary">{prayer.label}</Text>
+                    </View>
+
+                    <View className="flex-row gap-2">
+                      {/* Ezan Vakti Test */}
+                      <Pressable
+                        onPress={() => sendTestNotification(prayer.key, 'atTime')}
+                        className="flex-row items-center gap-1 px-3 py-2 bg-primary/10 rounded-lg active:bg-primary/20"
+                        accessible={true}
+                        accessibilityLabel={`${prayer.label} ezan vakti testi`}
+                      >
+                        <Ionicons name="volume-high" size={16} color="#2E7D32" />
+                        <Text className="text-sm font-medium text-primary">Ezan</Text>
+                      </Pressable>
+
+                      {/* 5 Dakika Önce Test */}
+                      <Pressable
+                        onPress={() => sendTestNotification(prayer.key, 'before')}
+                        className="flex-row items-center gap-1 px-3 py-2 bg-orange-100 rounded-lg active:bg-orange-200"
+                        accessible={true}
+                        accessibilityLabel={`${prayer.label} 5 dakika önce testi`}
+                      >
+                        <Ionicons name="alarm" size={16} color="#FF9800" />
+                        <Text className="text-sm font-medium text-[#FF9800]">5dk</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
           )}
         </View>
 
