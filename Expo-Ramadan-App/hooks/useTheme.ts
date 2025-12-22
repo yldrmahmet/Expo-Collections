@@ -24,6 +24,7 @@ export function useTheme() {
   const { colorScheme, setColorScheme } = useColorScheme();
   const [preference, setPreference] = useState<ThemePreference>('system');
   const [isLoading, setIsLoading] = useState(true);
+  const [isChanging, setIsChanging] = useState(false);
 
   // Başlangıçta kayıtlı tercihi yükle
   useEffect(() => {
@@ -61,11 +62,12 @@ export function useTheme() {
 
   /**
    * Tema tercihini değiştir ve kaydet
-   * Not: setColorScheme senkron çalışır, loading gerekmez
+   * isChanging: Tema geçişi sırasında loading göstermek için
    */
   const setThemePreference = useCallback(async (newPreference: ThemePreference) => {
     if (newPreference === preference) return;
 
+    setIsChanging(true);
     setPreference(newPreference);
     applyTheme(newPreference);
 
@@ -73,6 +75,9 @@ export function useTheme() {
       await AsyncStorage.setItem(STORAGE_KEYS.THEME_PREFERENCE, newPreference);
     } catch (error) {
       console.error('Tema tercihi kaydedilemedi:', error);
+    } finally {
+      // Kısa bir gecikme ile UI güncellemesini bekle
+      setTimeout(() => setIsChanging(false), 300);
     }
   }, [applyTheme, preference]);
 
@@ -91,6 +96,7 @@ export function useTheme() {
     activeTheme,
     isDark,
     isLoading,
+    isChanging,
     setThemePreference,
   };
 }

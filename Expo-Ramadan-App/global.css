@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light Theme (Default) */
+/*
+ * CSS Variables - Varsayılan değerler
+ * Gerçek tema değerleri ThemeProvider tarafından vars() ile uygulanır
+ * React Native'de @media (prefers-color-scheme) çalışmaz
+ */
 :root {
   /* Primary Colors - Ramazan Green */
   --color-primary: #2E7D32;
@@ -29,59 +33,4 @@
   --color-error: #D32F2F;
   --color-success: #2E7D32;
   --color-warning: #FF9800;
-}
-
-/* Dark Theme */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Primary Colors - Keep green but adjust */
-    --color-primary: #4CAF50;
-    --color-primary-dark: #2E7D32;
-    --color-primary-light: #81C784;
-
-    /* Backgrounds */
-    --color-background: #121212;
-    --color-surface: #1E1E1E;
-    --color-surface-elevated: #2C2C2C;
-    --color-today-bg: #1B3D1F;
-
-    /* Text Colors */
-    --color-text-primary: #E8E8E8;
-    --color-text-secondary: #B0B0B0;
-    --color-text-muted: #808080;
-    --color-text-on-primary: #FFFFFF;
-
-    /* Borders & Dividers */
-    --color-divider: #333333;
-    --color-border: #404040;
-
-    /* Status Colors */
-    --color-error: #EF5350;
-    --color-success: #4CAF50;
-    --color-warning: #FFB74D;
-  }
-}
-
-/* Manual Dark Theme Class (for user override) */
-.dark {
-  --color-primary: #4CAF50;
-  --color-primary-dark: #2E7D32;
-  --color-primary-light: #81C784;
-
-  --color-background: #121212;
-  --color-surface: #1E1E1E;
-  --color-surface-elevated: #2C2C2C;
-  --color-today-bg: #1B3D1F;
-
-  --color-text-primary: #E8E8E8;
-  --color-text-secondary: #B0B0B0;
-  --color-text-muted: #808080;
-  --color-text-on-primary: #FFFFFF;
-
-  --color-divider: #333333;
-  --color-border: #404040;
-
-  --color-error: #EF5350;
-  --color-success: #4CAF50;
-  --color-warning: #FFB74D;
 }

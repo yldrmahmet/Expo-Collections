@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 
 import { useCityContext } from '../context';
 import { CityPicker, PermissionExplanation, Loading } from '../components';
+import { useTheme } from '../hooks';
 
 /**
  * Hoşgeldin Ekranı
@@ -22,6 +23,10 @@ export default function WelcomeScreen() {
     selectCity,
     detectLocation,
   } = useCityContext();
+  const { isDark } = useTheme();
+
+  // Tema bazlı renkler
+  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
 
   // Şehir seçildiğinde tabs'a yönlendir
   useEffect(() => {
@@ -40,16 +45,16 @@ export default function WelcomeScreen() {
   // GPS konum tespiti yapılıyor
   if (isDetecting) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+      <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
         <Loading message="Konumunuz tespit ediliyor..." />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <View className="flex-1 justify-center items-center p-8">
-        <Ionicons name="location" size={64} color="#2E7D32" />
+        <Ionicons name="location" size={64} color={primaryColor} />
         <Text className="text-3xl font-bold text-text-primary mt-6 mb-2">
           Hoş Geldiniz
         </Text>

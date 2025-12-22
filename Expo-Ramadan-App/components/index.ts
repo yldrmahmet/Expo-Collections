@@ -5,3 +5,4 @@ export { PrayerTimeCard } from './PrayerTimeCard';
 export { CityPicker } from './CityPicker';
 export { PermissionExplanation } from './PermissionExplanation';
 export { BannerAd } from './BannerAd';
+export { ThemeProvider } from './ThemeProvider';

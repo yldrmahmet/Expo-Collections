@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../hooks';
 
 interface PermissionExplanationProps {
   visible: boolean;
@@ -25,6 +26,9 @@ export function PermissionExplanation({
   allowText = 'İzin Ver',
   cancelText = 'Daha Sonra',
 }: PermissionExplanationProps) {
+  const { isDark } = useTheme();
+  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
+
   return (
     <Modal
       visible={visible}
@@ -33,11 +37,11 @@ export function PermissionExplanation({
       onRequestClose={onCancel}
     >
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
-        <View className="bg-white rounded-2xl w-full max-w-sm overflow-hidden">
+        <View className="bg-surface-elevated rounded-2xl w-full max-w-sm overflow-hidden">
           {/* Icon Header */}
           <View className="bg-primary/10 py-8 items-center">
             <View className="w-20 h-20 rounded-full bg-primary/20 items-center justify-center">
-              <Ionicons name={icon} size={40} color="#2E7D32" />
+              <Ionicons name={icon} size={40} color={primaryColor} />
             </View>
           </View>
 
@@ -56,7 +60,7 @@ export function PermissionExplanation({
             </Text>
 
             <View className="flex-row items-start gap-2 bg-primary/5 p-3 rounded-lg mb-6">
-              <Ionicons name="checkmark-circle" size={20} color="#2E7D32" />
+              <Ionicons name="checkmark-circle" size={20} color={primaryColor} />
               <Text className="flex-1 text-base text-text-primary">
                 {benefit}
               </Text>

@@ -3,6 +3,7 @@ import { Modal, View, Text, FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getCityNames } from '../constants/CityCoordinates';
+import { useTheme } from '../hooks';
 
 interface CityPickerProps {
   visible: boolean;
@@ -13,6 +14,13 @@ interface CityPickerProps {
 
 export function CityPicker({ visible, selectedCity, onSelect, onClose }: CityPickerProps) {
   const cities = useMemo(() => getCityNames(), []);
+  const { isDark } = useTheme();
+
+  // Tema bazlı renkler
+  const colors = {
+    primary: isDark ? '#4CAF50' : '#2E7D32',
+    text: isDark ? '#E8E8E8' : '#1A1A1A',
+  };
 
   const renderCity = ({ item }: { item: string }) => {
     const isSelected = item === selectedCity;
@@ -40,7 +48,7 @@ export function CityPicker({ visible, selectedCity, onSelect, onClose }: CityPic
           <Ionicons
             name="checkmark-circle"
             size={24}
-            color="#2E7D32"
+            color={colors.primary}
             accessibilityElementsHidden={true}
           />
         )}
@@ -55,7 +63,7 @@ export function CityPicker({ visible, selectedCity, onSelect, onClose }: CityPic
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-white">
+      <SafeAreaView className="flex-1 bg-background">
         {/* Header */}
         <View className="flex-row justify-between items-center px-4 py-4 border-b border-divider">
           <Text
@@ -73,7 +81,7 @@ export function CityPicker({ visible, selectedCity, onSelect, onClose }: CityPic
             accessibilityLabel="Kapat"
             accessibilityHint="Şehir seçimini kapatır"
           >
-            <Ionicons name="close" size={28} color="#1A1A1A" />
+            <Ionicons name="close" size={28} color={colors.text} />
             <Text className="text-base text-text-primary font-medium">Kapat</Text>
           </Pressable>
         </View>

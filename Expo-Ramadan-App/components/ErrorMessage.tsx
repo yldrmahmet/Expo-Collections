@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from './Button';
+import { useTheme } from '../hooks';
 
 interface ErrorMessageProps {
   message: string;
@@ -8,18 +9,21 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
+  const { isDark } = useTheme();
+  const errorColor = isDark ? '#EF5350' : '#D32F2F';
+
   return (
     <View
-      className="flex-1 justify-center items-center p-8 bg-white"
+      className="flex-1 justify-center items-center p-8 bg-background"
       accessible={true}
       accessibilityRole="alert"
       accessibilityLiveRegion="assertive"
     >
-      <View className="w-20 h-20 rounded-full bg-red-50 justify-center items-center mb-6">
+      <View className="w-20 h-20 rounded-full bg-error/10 justify-center items-center mb-6">
         <Ionicons
           name="alert-circle"
           size={48}
-          color="#D32F2F"
+          color={errorColor}
           accessibilityElementsHidden={true}
         />
       </View>

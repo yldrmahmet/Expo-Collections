@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { CityProvider } from '../context';
+import { ThemeProvider } from '../components';
+import { useTheme } from '../hooks';
 
 // Splash screen'i otomatik kapatmayı engelle
 SplashScreen.preventAutoHideAsync();
@@ -17,11 +19,23 @@ SplashScreen.setOptions({
 });
 
 /**
- * Root Layout
- * - CityProvider: Şehir state'ini tüm uygulamada paylaşır
- * - Stack: Tüm route'ları tanımlar
- * - Yönlendirme: app/index.tsx'de yapılır
+ * Inner Layout - Theme hook kullanabilmek için
  */
+function InnerLayout() {
+  const { isDark } = useTheme();
+
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </>
+  );
+}
+
 export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
 
@@ -45,12 +59,9 @@ export default function RootLayout() {
   return (
     <CityProvider>
       <SafeAreaProvider>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="welcome" />
-          <Stack.Screen name="(tabs)" />
-        </Stack>
+        <ThemeProvider>
+          <InnerLayout />
+        </ThemeProvider>
       </SafeAreaProvider>
     </CityProvider>
   );

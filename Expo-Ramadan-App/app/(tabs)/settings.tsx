@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, ScrollView, Switch } from 'react-native';
+import { View, Text, Pressable, ScrollView, Switch, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -39,7 +39,7 @@ export default function SettingsScreen() {
     toggleNotificationTiming,
     sendTestNotification,
   } = useNotifications(city);
-  const { preference, isDark, setThemePreference } = useTheme();
+  const { preference, isDark, isChanging, setThemePreference } = useTheme();
 
   const [showNotificationPermission, setShowNotificationPermission] = useState(false);
 
@@ -85,34 +85,44 @@ export default function SettingsScreen() {
 
             {/* Tema Seçenekleri */}
             <View className="flex-row border-t border-divider">
-              {THEME_OPTIONS.map((option) => (
-                <Pressable
-                  key={option.key}
-                  onPress={() => setThemePreference(option.key)}
-                  className={`flex-1 py-3 items-center ${
-                    preference === option.key ? 'bg-primary/10' : ''
-                  }`}
-                  accessible={true}
-                  accessibilityRole="radio"
-                  accessibilityLabel={`${option.label} tema`}
-                  accessibilityState={{ selected: preference === option.key }}
-                >
-                  <Ionicons
-                    name={option.icon as any}
-                    size={24}
-                    color={preference === option.key ? primaryColor : isDark ? '#808080' : '#757575'}
-                  />
-                  <Text
-                    className={`text-sm mt-1 ${
-                      preference === option.key
-                        ? 'font-semibold text-primary'
-                        : 'text-text-muted'
+              {THEME_OPTIONS.map((option) => {
+                const isSelected = preference === option.key;
+                const showLoading = isSelected && isChanging;
+
+                return (
+                  <Pressable
+                    key={option.key}
+                    onPress={() => setThemePreference(option.key)}
+                    disabled={isChanging}
+                    className={`flex-1 py-3 items-center ${
+                      isSelected ? 'bg-primary/10' : ''
                     }`}
+                    accessible={true}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${option.label} tema`}
+                    accessibilityState={{ selected: isSelected }}
                   >
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
+                    {showLoading ? (
+                      <ActivityIndicator size="small" color={primaryColor} />
+                    ) : (
+                      <Ionicons
+                        name={option.icon as any}
+                        size={24}
+                        color={isSelected ? primaryColor : isDark ? '#808080' : '#757575'}
+                      />
+                    )}
+                    <Text
+                      className={`text-sm mt-1 ${
+                        isSelected
+                          ? 'font-semibold text-primary'
+                          : 'text-text-muted'
+                      }`}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
         </View>
