@@ -26,8 +26,7 @@ export function PermissionExplanation({
   allowText = 'İzin Ver',
   cancelText = 'Daha Sonra',
 }: PermissionExplanationProps) {
-  const { isDark } = useTheme();
-  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
+  const { colors } = useTheme();
 
   return (
     <Modal
@@ -41,7 +40,7 @@ export function PermissionExplanation({
           {/* Icon Header */}
           <View className="bg-primary/10 py-8 items-center">
             <View className="w-20 h-20 rounded-full bg-primary/20 items-center justify-center">
-              <Ionicons name={icon} size={40} color={primaryColor} />
+              <Ionicons name={icon} size={40} color={colors.primary} />
             </View>
           </View>
 
@@ -60,7 +59,7 @@ export function PermissionExplanation({
             </Text>
 
             <View className="flex-row items-start gap-2 bg-primary/5 p-3 rounded-lg mb-6">
-              <Ionicons name="checkmark-circle" size={20} color={primaryColor} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
               <Text className="flex-1 text-base text-text-primary">
                 {benefit}
               </Text>

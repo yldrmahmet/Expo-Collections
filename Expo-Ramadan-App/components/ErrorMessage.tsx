@@ -9,8 +9,7 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
-  const { isDark } = useTheme();
-  const errorColor = isDark ? '#EF5350' : '#D32F2F';
+  const { colors } = useTheme();
 
   return (
     <View
@@ -23,7 +22,7 @@ export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
         <Ionicons
           name="alert-circle"
           size={48}
-          color={errorColor}
+          color={colors.error}
           accessibilityElementsHidden={true}
         />
       </View>

@@ -30,9 +30,7 @@ export default function HomeScreen() {
   } = useCityContext();
 
   // Tema
-  const { isDark } = useTheme();
-  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
-  const mutedColor = isDark ? '#808080' : '#757575';
+  const { colors } = useTheme();
 
   // Ay navigasyonu
   const {
@@ -121,9 +119,9 @@ export default function HomeScreen() {
         accessibilityRole="button"
         accessibilityLabel={`Şehir: ${city}. Değiştirmek için dokunun`}
       >
-        <Ionicons name="location" size={20} color={primaryColor} />
+        <Ionicons name="location" size={20} color={colors.primary} />
         <Text className="text-lg font-semibold text-text-primary">{city}</Text>
-        <Ionicons name="chevron-down" size={18} color={mutedColor} />
+        <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
       </Pressable>
 
       {/* Ay Navigasyonu */}
@@ -135,7 +133,7 @@ export default function HomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Önceki ay"
         >
-          <Ionicons name="chevron-back" size={28} color={primaryColor} />
+          <Ionicons name="chevron-back" size={28} color={colors.primary} />
         </Pressable>
 
         {/* Ay/Yıl + Bugüne Dön */}
@@ -162,7 +160,7 @@ export default function HomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Sonraki ay"
         >
-          <Ionicons name="chevron-forward" size={28} color={primaryColor} />
+          <Ionicons name="chevron-forward" size={28} color={colors.primary} />
         </Pressable>
       </View>
 
@@ -183,7 +181,7 @@ export default function HomeScreen() {
           <Ionicons
             name="list"
             size={20}
-            color={viewMode === 'simple' ? '#FFFFFF' : primaryColor}
+            color={viewMode === 'simple' ? '#FFFFFF' : colors.primary}
           />
           <Text
             className={`text-base font-semibold ${
@@ -209,7 +207,7 @@ export default function HomeScreen() {
           <Ionicons
             name="grid"
             size={20}
-            color={viewMode === 'detailed' ? '#FFFFFF' : primaryColor}
+            color={viewMode === 'detailed' ? '#FFFFFF' : colors.primary}
           />
           <Text
             className={`text-base font-semibold ${

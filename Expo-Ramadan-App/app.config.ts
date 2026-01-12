@@ -11,7 +11,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version,
   scheme: 'iftar-vakti',
   orientation: 'portrait',
-  userInterfaceStyle: 'light',
+  userInterfaceStyle: 'automatic',
   icon: './assets/acilis-ekrani.png',
 
   splash: {

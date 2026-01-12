@@ -23,10 +23,7 @@ export default function WelcomeScreen() {
     selectCity,
     detectLocation,
   } = useCityContext();
-  const { isDark } = useTheme();
-
-  // Tema bazlı renkler
-  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
+  const { colors } = useTheme();
 
   // Şehir seçildiğinde tabs'a yönlendir
   useEffect(() => {
@@ -54,7 +51,7 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <View className="flex-1 justify-center items-center p-8">
-        <Ionicons name="location" size={64} color={primaryColor} />
+        <Ionicons name="location" size={64} color={colors.primary} />
         <Text className="text-3xl font-bold text-text-primary mt-6 mb-2">
           Hoş Geldiniz
         </Text>

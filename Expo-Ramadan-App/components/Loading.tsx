@@ -6,8 +6,7 @@ interface LoadingProps {
 }
 
 export function Loading({ message = 'Yükleniyor...' }: LoadingProps) {
-  const { isDark } = useTheme();
-  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
+  const { colors } = useTheme();
 
   return (
     <View
@@ -17,7 +16,7 @@ export function Loading({ message = 'Yükleniyor...' }: LoadingProps) {
       accessibilityLabel={message}
       accessibilityLiveRegion="polite"
     >
-      <ActivityIndicator size={80} color={primaryColor} />
+      <ActivityIndicator size={80} color={colors.primary} />
       <Text className="mt-6 text-2xl text-text-secondary text-center">{message}</Text>
     </View>
   );

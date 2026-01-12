@@ -14,22 +14,14 @@ const TAB_BAR_CONTENT_HEIGHT = 64;
  */
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { isDark } = useTheme();
-
-  // Tema bazlı renkler
-  const colors = {
-    background: isDark ? '#121212' : '#FFFFFF',
-    border: isDark ? '#333333' : '#E0E0E0',
-    active: isDark ? '#4CAF50' : '#2E7D32',
-    inactive: isDark ? '#808080' : '#757575',
-  };
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.active,
-        tabBarInactiveTintColor: colors.inactive,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,

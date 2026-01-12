@@ -39,12 +39,9 @@ export default function SettingsScreen() {
     toggleNotificationTiming,
     sendTestNotification,
   } = useNotifications(city);
-  const { preference, isDark, isChanging, setThemePreference } = useTheme();
+  const { preference, isDark, isChanging, colors, setThemePreference } = useTheme();
 
   const [showNotificationPermission, setShowNotificationPermission] = useState(false);
-
-  // Tema renklerini al (dinamik)
-  const primaryColor = isDark ? '#4CAF50' : '#2E7D32';
 
   // Bildirim toggle - önce açıklama göster
   const handleToggleNotifications = () => {
@@ -70,7 +67,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center p-4">
               <View className="flex-row items-center gap-3 flex-1">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons name={isDark ? 'moon' : 'sunny'} size={22} color={primaryColor} />
+                  <Ionicons name={isDark ? 'moon' : 'sunny'} size={22} color={colors.primary} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-lg font-semibold text-text-primary">
@@ -103,12 +100,12 @@ export default function SettingsScreen() {
                     accessibilityState={{ selected: isSelected }}
                   >
                     {showLoading ? (
-                      <ActivityIndicator size="small" color={primaryColor} />
+                      <ActivityIndicator size="small" color={colors.primary} />
                     ) : (
                       <Ionicons
                         name={option.icon as any}
                         size={24}
-                        color={isSelected ? primaryColor : isDark ? '#808080' : '#757575'}
+                        color={isSelected ? colors.primary : isDark ? '#808080' : '#757575'}
                       />
                     )}
                     <Text
@@ -138,7 +135,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between p-4 border-b border-divider">
               <View className="flex-row items-center gap-3 flex-1">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons name="notifications" size={22} color={primaryColor} />
+                  <Ionicons name="notifications" size={22} color={colors.primary} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-lg font-semibold text-text-primary">
@@ -177,7 +174,7 @@ export default function SettingsScreen() {
                   accessibilityState={{ checked: settings.notifyAtPrayerTime }}
                 >
                   <View className="flex-row items-center gap-3">
-                    <Ionicons name="time" size={24} color={primaryColor} />
+                    <Ionicons name="time" size={24} color={colors.primary} />
                     <View>
                       <Text className="text-base text-text-primary">Ezan Vaktinde</Text>
                       <Text className="text-xs text-text-secondary">Ezan sesi ile bildirim</Text>
@@ -287,7 +284,7 @@ export default function SettingsScreen() {
                         accessible={true}
                         accessibilityLabel={`${prayer.label} ezan vakti testi`}
                       >
-                        <Ionicons name="volume-high" size={16} color={primaryColor} />
+                        <Ionicons name="volume-high" size={16} color={colors.primary} />
                         <Text className="text-sm font-medium text-primary">Ezan</Text>
                       </Pressable>
 
@@ -319,7 +316,7 @@ export default function SettingsScreen() {
             <View className="flex-row items-center justify-between p-4">
               <View className="flex-row items-center gap-3">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons name="information-circle" size={22} color={primaryColor} />
+                  <Ionicons name="information-circle" size={22} color={colors.primary} />
                 </View>
                 <Text className="text-base text-text-primary">Versiyon</Text>
               </View>

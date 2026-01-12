@@ -14,13 +14,7 @@ interface CityPickerProps {
 
 export function CityPicker({ visible, selectedCity, onSelect, onClose }: CityPickerProps) {
   const cities = useMemo(() => getCityNames(), []);
-  const { isDark } = useTheme();
-
-  // Tema bazlı renkler
-  const colors = {
-    primary: isDark ? '#4CAF50' : '#2E7D32',
-    text: isDark ? '#E8E8E8' : '#1A1A1A',
-  };
+  const { colors } = useTheme();
 
   const renderCity = ({ item }: { item: string }) => {
     const isSelected = item === selectedCity;

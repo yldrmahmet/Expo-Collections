@@ -1,6 +1,6 @@
 import '../global.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -19,10 +19,22 @@ SplashScreen.setOptions({
 });
 
 /**
- * Inner Layout - Theme hook kullanabilmek için
+ * Inner Layout - Theme yüklendikten sonra render edilir
  */
 function InnerLayout() {
-  const { isDark } = useTheme();
+  const { isDark, isLoading } = useTheme();
+
+  useEffect(() => {
+    // Tema yüklendikten sonra splash screen'i kapat
+    if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  // Tema yüklenene kadar bekle (splash screen görünür kalır)
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <>
@@ -37,25 +49,6 @@ function InnerLayout() {
 }
 
 export default function RootLayout() {
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    async function prepare() {
-      try {
-        setIsReady(true);
-        await SplashScreen.hideAsync();
-      } catch (e) {
-        console.warn(e);
-      }
-    }
-
-    prepare();
-  }, []);
-
-  if (!isReady) {
-    return null;
-  }
-
   return (
     <CityProvider>
       <SafeAreaProvider>

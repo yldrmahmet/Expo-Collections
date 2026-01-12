@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Constants from 'expo-constants';
 
@@ -25,9 +24,6 @@ function getAdUnitId(): string | undefined {
 }
 
 export function BannerAd() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const adUnitId = getAdUnitId();
 
   if (!isAdMobAvailable || !adUnitId || !GoogleBannerAd) {
@@ -51,20 +47,7 @@ export function BannerAd() {
         requestOptions={{
           requestNonPersonalizedAdsOnly: true,
         }}
-        onAdLoaded={() => {
-          setIsLoaded(true);
-          setError(null);
-        }}
-        onAdFailedToLoad={(err: any) => {
-          setError(err.message);
-        }}
       />
-
-      {__DEV__ && (
-        <Text className="text-xs text-text-secondary py-1">
-          {isLoaded ? 'Reklam yüklendi' : error ? `Hata: ${error}` : 'Reklam yükleniyor...'}
-        </Text>
-      )}
     </View>
   );
 }
